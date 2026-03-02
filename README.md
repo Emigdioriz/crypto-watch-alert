@@ -2,7 +2,7 @@
 
 ### Pré requisitos
 - uv (gestor de dependências)
-- alterar todos as ocorrências do padrão {{project_name}} para o nome do serviço
+- alterar todos as ocorrências do padrão alert para o nome do serviço
 
 
 ### Instalação
