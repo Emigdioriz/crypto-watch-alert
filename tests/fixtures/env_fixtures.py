@@ -1,7 +1,7 @@
 import pytest
 from httpx import AsyncClient, ASGITransport
 
-from alert.config.db import get_session
+from infraestructure.config.db import get_session
 from alert.main import app
 
 

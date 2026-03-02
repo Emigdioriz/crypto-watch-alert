@@ -8,8 +8,8 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from src.alert.config.db import mapper_registry
-from src.alert.config.env import get_settings
+from infraestructure.config.db import mapper_registry
+from infraestructure.config.env import get_settings
 
 
 connection_string = get_settings().database_url

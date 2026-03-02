@@ -4,8 +4,8 @@ import pytest
 from sqlalchemy.pool import NullPool
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy import event
-from alert.config.db import mapper_registry
-from alert.config.env import TestSettings
+from infraestructure.config.db import mapper_registry
+from infraestructure.config.env import TestSettings
 
 
 @pytest.fixture(scope="session")

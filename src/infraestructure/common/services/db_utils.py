@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy import Select
 from sqlalchemy.orm import class_mapper
 
-from ....config.db import Session
+from .....infraestructure.config.db import Session
 
 
 T = TypeVar('T')
