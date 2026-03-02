@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 from sqlalchemy import String, DateTime, func, Enum
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, mapped_as_dataclass, relationship
-from ....config.db import mapper_registry
+from ...infraestructure.config.db import mapper_registry
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -17,10 +17,12 @@ class AlertStatus(enum.Enum):
 class Alert:
     __tablename__ = "alerts"
 
-    def __init__(self, target_price: Decimal):
+    def __init__(self, target_price: Decimal, symbol: str):
         if target_price <=0:
             raise ValueError("Target price must be a positive decimal.")
-
+        self.target_price = target_price
+        self.symbol = symbol
+        self.status = AlertStatus.PENDING
 
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, init=False, default_factory=uuid4)
     symbol: Mapped[str] = mapped_column(String, nullable=False)
