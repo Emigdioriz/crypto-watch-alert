@@ -6,7 +6,7 @@ from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from http import HTTPStatus
 
-from ..config.env import Settings, get_settings
+from ...infraestructure.config.env import Settings, get_settings
 
 
 oauth2_scheme = OAuth2PasswordBearer(
