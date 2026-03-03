@@ -23,6 +23,7 @@ class Alert:
         self.target_price = target_price
         self.symbol = symbol
         self.status = AlertStatus.PENDING
+        self.id = uuid4()  # Generate a new UUID for the alert
 
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, init=False, default_factory=uuid4)
     symbol: Mapped[str] = mapped_column(String, nullable=False)
