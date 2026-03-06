@@ -9,9 +9,11 @@
 
 
 import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from src.infraestructure.config.db import mapper_registry
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from src.infraestructure.config.db import mapper_registry, get_session
+from fastapi.testclient import TestClient
+from src.main import app
+
 
 
 # @pytest.fixture(scope="session")
@@ -51,14 +53,51 @@ from src.infraestructure.config.db import mapper_registry
 # def mock_db_time():
 #     return _mock_db_time
 
+@pytest.fixture
+async def db_session():
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:", echo=True)
+    async with engine.begin() as conn:
+        await conn.run_sync(mapper_registry.metadata.create_all)
+    async with AsyncSession(engine, expire_on_commit=False) as session:
+        yield session
+    await engine.dispose()
+
 
 @pytest.fixture
-def db_session():
-    # Cria engine SQLite em memória
-    engine = create_engine("sqlite:///:memory:", echo=True)
+def client():
+    # Cria engine e sessão síncrona em memória para usar com TestClient
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker, scoped_session
+    from sqlalchemy.pool import StaticPool
+    
+    # Usa StaticPool e check_same_thread=False para permitir uso em diferentes threads
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+        echo=True
+    )
+    
     # Cria as tabelas
     mapper_registry.metadata.create_all(engine)
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    yield session
-    session.close()
+    
+    # Usa scoped_session para thread-safety
+    session_factory = sessionmaker(bind=engine)
+    Session = scoped_session(session_factory)
+    
+    def get_test_session():
+        session = Session()
+        try:
+            yield session
+        finally:
+            session.close()
+            Session.remove()
+    
+    app.dependency_overrides[get_session] = get_test_session
+    
+    with TestClient(app) as test_client:
+        yield test_client
+    
+    app.dependency_overrides = {}
+    Session.remove()
+    engine.dispose() 

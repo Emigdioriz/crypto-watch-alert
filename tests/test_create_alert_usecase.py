@@ -8,18 +8,19 @@ class MockAlertRepository(IAlertrepository):
     def __init__(self):
         self.alerts = []
 
-    def add(self, alert: Alert) -> Alert:
+    async def add(self, alert: Alert) -> Alert:
         self.alerts.append(alert)
         return alert
-    
-def test_create_alert_use_case():
+
+@pytest.mark.asyncio
+async def test_create_alert_use_case():
     # Arrange
     mock_repo = MockAlertRepository()
     use_case = CreateAlertUseCase(repository=mock_repo)
     dto = AlertCreateDTO(symbol="BTCUSDT", targetPrice=50000.00)
 
     # Act
-    created_alert = use_case.execute(dto)
+    created_alert = await use_case.execute(dto)
 
     # Assert
     assert created_alert.symbol == dto.symbol
