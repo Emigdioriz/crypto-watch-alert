@@ -8,12 +8,6 @@
 # from infraestructure.config.env import TestSettings
 
 
-import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from src.infraestructure.config.db import mapper_registry
-
-
 # @pytest.fixture(scope="session")
 # async def engine():
 #     engine = create_async_engine(str(TestSettings().database_url), poolclass=NullPool)
@@ -52,13 +46,58 @@ from src.infraestructure.config.db import mapper_registry
 #     return _mock_db_time
 
 
+import pytest
+import asyncio
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from src.infraestructure.config.db import mapper_registry, get_session
+from fastapi.testclient import TestClient
+from src.main import app
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.pool import StaticPool
+
 @pytest.fixture
-def db_session():
-    # Cria engine SQLite em memória
-    engine = create_engine("sqlite:///:memory:", echo=True)
-    # Cria as tabelas
-    mapper_registry.metadata.create_all(engine)
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    yield session
-    session.close()
+async def db_session():
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:", echo=True)
+    async with engine.begin() as conn:
+        await conn.run_sync(mapper_registry.metadata.create_all)
+    async with AsyncSession(engine, expire_on_commit=False) as session:
+        yield session
+    await engine.dispose()
+
+
+@pytest.fixture
+def client():
+    # Cria engine ASYNC em memória para usar com TestClient
+    # TestClient executa endpoints async normalmente
+    # Engine async com SQLite em memória
+    engine = create_async_engine(
+        "sqlite+aiosqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+        echo=True
+    )
+    
+    # Cria as tabelas de forma síncrona (necessário para setup da fixture)
+    async def setup_db():
+        async with engine.begin() as conn:
+            await conn.run_sync(mapper_registry.metadata.create_all)
+    
+    asyncio.run(setup_db())
+    
+    # Função de override que retorna AsyncSession
+    async def get_test_session():
+        async with AsyncSession(engine, expire_on_commit=False) as session:
+            yield session
+    
+    app.dependency_overrides[get_session] = get_test_session
+    
+    with TestClient(app) as test_client:
+        yield test_client
+    
+    app.dependency_overrides = {}
+    
+    # Cleanup
+    async def cleanup():
+        await engine.dispose()
+    
+    asyncio.run(cleanup()) 

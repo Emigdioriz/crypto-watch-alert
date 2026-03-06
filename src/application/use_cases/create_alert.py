@@ -6,6 +6,10 @@ class CreateAlertUseCase:
     def __init__(self, repository: IAlertrepository):
         self.repository = repository
 
-    def execute(self, dto: AlertCreateDTO) -> Alert:
+    async def execute(self, dto: AlertCreateDTO) -> Alert:
+
+        if dto.target_price <= 0:
+            raise ValueError("Target price must be a positive decimal.")
+
         alert = Alert(symbol=dto.symbol, target_price=dto.target_price)
-        return self.repository.add(alert)
+        return await self.repository.add(alert)

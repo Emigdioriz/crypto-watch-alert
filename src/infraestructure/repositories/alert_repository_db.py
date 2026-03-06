@@ -5,10 +5,10 @@ class AlertrepositoryDB(IAlertrepository):
     def __init__(self, session):
         self.session = session
 
-    def add(self, alert: Alert) -> Alert:
+    async def add(self, alert: Alert) -> Alert:
         self.session.add(alert)
-        self.session.commit()
-        self.session.refresh(alert)
+        await self.session.commit()
+        await self.session.refresh(alert)
         return alert
     
     # Implement other methods as needed, such as get, update, delete, etc.
