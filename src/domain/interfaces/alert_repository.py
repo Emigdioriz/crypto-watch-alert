@@ -14,3 +14,7 @@ class IAlertrepository(ABC):
     @abstractmethod
     def get_by_id(self, alert_id: UUID):
         pass
+
+    @abstractmethod
+    def delete(self, alert_id: UUID):
+        pass

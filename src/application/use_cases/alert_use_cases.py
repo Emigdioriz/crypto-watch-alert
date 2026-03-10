@@ -28,3 +28,8 @@ class GetAlertByIdUseCase(BaseAlertUseCase):
     async def execute(self, alert_id: UUID):
         alert = await self.repository.get_by_id(alert_id)
         return alert
+    
+
+class DeleteAlertUseCase(BaseAlertUseCase):
+    async def execute(self, alert_id: UUID):
+        await self.repository.delete(alert_id)

@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from uuid import UUID
 from ...domain.entities.alert import Alert
 from ...domain.interfaces.alert_repository import IAlertrepository
@@ -28,3 +28,7 @@ class AlertrepositoryDB(IAlertrepository):
             error_message=f"Alert with id {alert_id} not found."
         )
         return result
+
+    async def delete(self, alert_id: UUID) -> None:
+        await self.session.execute(delete(Alert).where(Alert.id == alert_id))
+        await self.session.commit()

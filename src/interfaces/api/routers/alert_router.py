@@ -6,7 +6,7 @@ from ....application.dtos.common.guid_dto import GuidResponse
 from ....application.dtos.common.api_dto import ApiResponse
 from ....infraestructure.repositories.alert_repository_db import AlertrepositoryDB
 from ....infraestructure.config.db import Session
-from ....application.use_cases.alert import CreateAlertUseCase, GetAlertsUseCase, GetAlertByIdUseCase
+from ....application.use_cases.alert_use_cases import CreateAlertUseCase, GetAlertsUseCase, GetAlertByIdUseCase, DeleteAlertUseCase
 
 
 router = APIRouter(prefix="/alerts", tags=["alerts"])
@@ -56,3 +56,14 @@ async def get_alert_by_id(
 ):
     alert = await use_case.execute(alert_id)
     return ApiResponse(detail=alert)
+
+
+@router.delete(
+    '/{alert_id}',
+    status_code=status.HTTP_204_NO_CONTENT
+)
+async def delete_alert(
+    alert_id: UUID,
+    use_case: DeleteAlertUseCase = Depends(partial(get_use_case, use_case_cls=DeleteAlertUseCase))
+):
+    await use_case.execute(alert_id)
