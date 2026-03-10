@@ -10,4 +10,3 @@ class AlertFactory(factory.Factory):
 
     symbol = factory.LazyAttribute(lambda _: fake.currency_code())
     target_price = factory.LazyAttribute(lambda _: fake.pydecimal(left_digits=5, right_digits=2, positive=True))
-    status = AlertStatus.PENDING

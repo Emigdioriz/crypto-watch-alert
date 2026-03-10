@@ -11,11 +11,7 @@ async def test_create_alert_use_case():
     mock_repo = MockAlertRepository()
     use_case = CreateAlertUseCase(repository=mock_repo)
     dto = AlertCreateDTO(symbol="BTCUSDT", targetPrice=50000.00)
-
-    # Act
     created_alert = await use_case.execute(dto)
-
-    # Assert
     assert created_alert.symbol == dto.symbol
     assert created_alert.target_price == dto.target_price
     assert created_alert.status == AlertStatus.PENDING
@@ -24,7 +20,6 @@ async def test_create_alert_use_case():
 @pytest.mark.asyncio
 async def test_get_alerts_use_case():
     mock_repo = MockAlertRepository()
-    # Adiciona alertas mockados
     alert1 = await mock_repo.add(Alert(symbol="BTCUSDT", target_price=50000.00))
     alert2 = await mock_repo.add(Alert(symbol="ETHUSDT", target_price=3000.00))
     use_case = GetAlertsUseCase(repository=mock_repo)
