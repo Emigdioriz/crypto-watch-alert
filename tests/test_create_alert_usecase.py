@@ -2,7 +2,7 @@ import pytest
 from src.domain.entities.alert import Alert, AlertStatus
 from src.domain.interfaces.alert_repository import IAlertrepository
 from src.application.dtos.alert_dtos import AlertCreateDTO
-from src.application.use_cases.create_alert import CreateAlertUseCase
+from application.use_cases.alert import CreateAlertUseCase
 
 class MockAlertRepository(IAlertrepository):
     def __init__(self):
